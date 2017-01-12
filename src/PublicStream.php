@@ -4,18 +4,21 @@ namespace Spatie\TwitterStreamingApi;
 
 use Phirehose;
 
-class PublicStream extends TwitterStream
+class PublicStream extends BaseStream
 {
     public function __construct($accessToken, $accessSecret, $consumerKey, $consumerSecret)
     {
-        parent::__construct(
+
+
+        $this->stream = $this->createStream(
             $accessToken,
             $accessSecret,
             $consumerKey,
             $consumerSecret,
-            Phirehose::METHOD_FILTER);
+            Phirehose::METHOD_FILTER
+        );
     }
-    
+
     /**
      * @param string|array $listenFor
      * @param callable $whenHears
@@ -24,13 +27,13 @@ class PublicStream extends TwitterStream
      */
     public function whenHears($listenFor, callable $whenHears)
     {
-        if (! is_array($listenFor)) {
+        if (!is_array($listenFor)) {
             $listenFor = [$listenFor];
         }
 
-        $this->setTrack($listenFor);
+        $this->stream->setTrack($listenFor);
 
-        $this->onStreamActivity = $whenHears;
+        $this->stream->performOnStreamActivity($whenHears);
 
         return $this;
     }

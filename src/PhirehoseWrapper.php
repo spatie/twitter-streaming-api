@@ -5,14 +5,14 @@ namespace Spatie\TwitterStreamingApi;
 use OauthPhirehose;
 use Phirehose;
 
-class TwitterStream extends OauthPhirehose
+class PhirehoseWrapper extends OauthPhirehose
 {
     /** @var callable */
-    public $onStreamActivity;
+    protected $onStreamActivity;
 
     public function __construct($accessToken, $accessSecret, $consumerKey, $consumerSecret, $method = Phirehose::METHOD_FILTER)
     {
-        parent::__construct($accessToken, $accessSecret, $method);
+        parent::__construct($accessToken, $accessSecret, $consumerKey, $consumerKey);
 
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
@@ -28,6 +28,11 @@ class TwitterStream extends OauthPhirehose
     public function enqueueStatus($status)
     {
         ($this->onStreamActivity)($status);
+    }
+
+    public function performOnStreamActivity(callable $onStreamActivity)
+    {
+        $this->onStreamActivity = $onStreamActivity;
     }
 
     public function startListening()
