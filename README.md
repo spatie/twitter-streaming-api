@@ -8,7 +8,7 @@
 [![StyleCI](https://styleci.io/repos/78684837/shield?branch=master)](https://styleci.io/repos/78684837)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/twitter-streaming-api.svg?style=flat-square)](https://packagist.org/packages/spatie/twitter-streaming-api)
 
-Twitter provides a streaming api with which you can do interesting things such as listening for tweets with specific strings or action a user might take (such as liking a tweet, following someone, ...) This package provides with a way to very easily work with the API.
+Twitter provides a streaming api with which you can do interesting things such as listening for tweets with specific strings or action a user might take (such as liking a tweet, following someone, ...). Using this package it's very easy to work with the API.
 
 Here's a quick example:
 
