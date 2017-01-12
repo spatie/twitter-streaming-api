@@ -6,7 +6,12 @@ use Phirehose;
 
 class PublicStream extends BaseStream
 {
-    public function __construct($accessToken, $accessSecret, $consumerKey, $consumerSecret)
+    public function __construct(
+        string $accessToken,
+        string $accessSecret,
+        string $consumerKey,
+        string $consumerSecret
+    )
     {
         $this->stream = $this->createStream(
             $accessToken,

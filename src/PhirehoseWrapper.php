@@ -10,6 +10,14 @@ class PhirehoseWrapper extends OauthPhirehose
     /** @var callable */
     protected $onStreamActivity;
 
+    /**
+     * @param string $accessToken
+     * @param string $accessSecret
+     * @param string $consumerKey
+     * @param string $consumerSecret
+     *
+     * @param string $method
+     */
     public function __construct($accessToken, $accessSecret, $consumerKey, $consumerSecret, $method = Phirehose::METHOD_FILTER)
     {
         parent::__construct($accessToken, $accessSecret, $method);
@@ -25,6 +33,9 @@ class PhirehoseWrapper extends OauthPhirehose
         };
     }
 
+    /**
+     * @param mixed $status
+     */
     public function enqueueStatus($status)
     {
         ($this->onStreamActivity)(json_decode($status, true));

@@ -23,7 +23,11 @@ abstract class BaseStream
         );
     }
 
-    public static function create($accessToken, $accessSecret, $consumerKey, $consumerSecret)
+    public static function create(
+        string $accessToken,
+        string $accessSecret,
+        string $consumerKey,
+        string $consumerSecret)
     {
         return new static(...func_get_args());
     }
