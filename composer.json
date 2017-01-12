@@ -27,7 +27,7 @@
             "Spatie\\TwitterStreamingApi\\": "src"
         },
         "classmap": [
-            "vendor/fennb/phirehose/lib"
+            "../../../vendor/fennb/phirehose/lib"
         ]
     },
     "autoload-dev": {
