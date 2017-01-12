@@ -8,7 +8,7 @@
 [![StyleCI](https://styleci.io/repos/78684837/shield?branch=master)](https://styleci.io/repos/78684837)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/twitter-streaming-api.svg?style=flat-square)](https://packagist.org/packages/spatie/twitter-streaming-api)
 
-Twitter provides a streaming api with which you can do interesting things such as listening for tweets with specific strings or action a user might take (such as liking a tweet, following someone, ...). Using this package it's very easy to work with the API.
+Twitter provides a streaming API with which you can do interesting things such as listening for tweets that contain specific strings or actions a user might take (e.g. liking a tweet, following someone, ...). This package makes it very easy to work with the API.
 
 Here's a quick example:
 
@@ -46,7 +46,7 @@ composer require spatie/twitter-streaming-api
 
 ## Getting credentials
 
-In order to use this package you'll need to get some credentials from Twitter. Head over to the [Application management on Twitter](https://apps.twitter.com/) to get started. On that site you must create an application.
+In order to use this package you'll need to get some credentials from Twitter. Head over to the [Application management on Twitter](https://apps.twitter.com/) where you create an application.
 
 Once you've created your application, click on the `Keys and access tokens` tab to retrieve your `consumer_key`, `consumer_secret`, `access_token` and `access_token_secret`. 
 
@@ -54,13 +54,13 @@ Once you've created your application, click on the `Keys and access tokens` tab 
 
 ## Usage
 
-This package currently can work with the public stream and the user stream. Both the `PublicStream` and `UserStream` classes provide a `startListening` function that kicks of the listening process. Unless you cancel it your PHP process will executed that function forever. No code after the function will be run.
+Currently, this package works with the public stream and the user stream. Both the `PublicStream` and `UserStream` classes provide a `startListening` function that kicks of the listening process. Unless you cancel it your PHP process will execute that function forever. No code after the function will be run.
 
 ### The public stream
 
 The public stream can be used to listen for specific words that are being tweeted.
 
-The first parameter of `whenHears` must be a string or an array containing the word or words you want to listen for. The second parameter should be a callable that will be execute when one of your words get used on Twitter.
+The first parameter of `whenHears` must be a string or an array containing the word or words you want to listen for. The second parameter should be a callable that will be executed when one of your words is used on Twitter.
 
 ```php
 PublicStream::create(
@@ -92,7 +92,7 @@ UserStream::create(
 
 ## A word to the wise
 
-These API's work in realtime. It's possible that they will report back a lot of activity. If you need to do some heavy work processing that activity it's best to put that work in a queue so your listening process stays fast.
+These APIs work in realtime, so they could report a lot of activity. If you need to do some heavy work processing that activity it's best to put that work in a queue to keep your listening process fast.
 
 ## Changelog
 
