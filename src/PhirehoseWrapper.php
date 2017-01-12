@@ -17,10 +17,14 @@ class PhirehoseWrapper extends OauthPhirehose
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
 
+        if ($method === Phirehose::METHOD_USER) {
+            $this->URL_BASE = 'https://userstream.twitter.com/1.1/';
+        }
+
         $this->onStreamActivity = function ($status) {
         };
     }
-    
+
     public function enqueueStatus($status)
     {
         ($this->onStreamActivity)($status);
