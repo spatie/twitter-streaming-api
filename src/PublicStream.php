@@ -8,8 +8,6 @@ class PublicStream extends BaseStream
 {
     public function __construct($accessToken, $accessSecret, $consumerKey, $consumerSecret)
     {
-
-
         $this->stream = $this->createStream(
             $accessToken,
             $accessSecret,
@@ -27,7 +25,7 @@ class PublicStream extends BaseStream
      */
     public function whenHears($listenFor, callable $whenHears)
     {
-        if (!is_array($listenFor)) {
+        if (! is_array($listenFor)) {
             $listenFor = [$listenFor];
         }
 

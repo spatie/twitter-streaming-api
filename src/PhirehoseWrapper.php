@@ -2,8 +2,8 @@
 
 namespace Spatie\TwitterStreamingApi;
 
-use OauthPhirehose;
 use Phirehose;
+use OauthPhirehose;
 
 class PhirehoseWrapper extends OauthPhirehose
 {
@@ -17,11 +17,12 @@ class PhirehoseWrapper extends OauthPhirehose
         $this->consumerKey = $consumerKey;
         $this->consumerSecret = $consumerSecret;
 
-        $this->onStreamActivity = function($status) {};
+        $this->onStreamActivity = function ($status) {
+        };
     }
 
     /**
-     * Enqueue each status
+     * Enqueue each status.
      *
      * @param string $status
      */

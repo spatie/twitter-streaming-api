@@ -4,7 +4,7 @@ namespace Spatie\TwitterStreamingApi;
 
 abstract class BaseStream
 {
-    /** @var \Spatie\TwitterStreamingApi\PhirehoseWrapper  */
+    /** @var \Spatie\TwitterStreamingApi\PhirehoseWrapper */
     protected $stream;
 
     protected function createStream(
@@ -13,8 +13,7 @@ abstract class BaseStream
         string $consumerKey,
         string $consumerSecret,
         string $filter
-    ) : PhirehoseWrapper
-    {
+    ) : PhirehoseWrapper {
         return new PhirehoseWrapper(
             $accessToken,
             $accessSecret,
