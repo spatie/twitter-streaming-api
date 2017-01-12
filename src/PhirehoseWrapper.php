@@ -15,7 +15,6 @@ class PhirehoseWrapper extends OauthPhirehose
      * @param string $accessSecret
      * @param string $consumerKey
      * @param string $consumerSecret
-     *
      * @param string $method
      */
     public function __construct($accessToken, $accessSecret, $consumerKey, $consumerSecret, $method = Phirehose::METHOD_FILTER)
