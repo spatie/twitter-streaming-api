@@ -19,7 +19,7 @@ PublicStream::create(
     $consumerKey,
     $consumerSecret
 )->whenHears('@spatie_be', function(array $tweet) {
-    echo "We got mentioned by {$tweet['user']['screen_name]} who tweeted $tweet['text']"
+    echo "We got mentioned by {$tweet['user']['screen_name]} who tweeted $tweet['text']";
 })
 ->startListening();
 ```
@@ -65,7 +65,7 @@ PublicStream::create(
     $consumerKey,
     $consumerSecret
 )->whenHears('@spatie_be', function(array $tweet) {
-    echo "We got mentioned by {$tweet['user']['screen_name]} who tweeted $tweet['text']"
+    echo "We got mentioned by {$tweet['user']['screen_name]} who tweeted $tweet['text']";
 })
 ->startListening();
 ```
