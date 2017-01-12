@@ -27,7 +27,7 @@ class PhirehoseWrapper extends OauthPhirehose
 
     public function enqueueStatus($status)
     {
-        ($this->onStreamActivity)($status);
+        ($this->onStreamActivity)(json_decode($status, true));
     }
 
     public function performOnStreamActivity(callable $onStreamActivity)

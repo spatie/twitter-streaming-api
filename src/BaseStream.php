@@ -23,6 +23,11 @@ abstract class BaseStream
         );
     }
 
+    public static function create($accessToken, $accessSecret, $consumerKey, $consumerSecret)
+    {
+        return new static(...func_get_args());
+    }
+
     public function startListening()
     {
         $this->stream->startListening();

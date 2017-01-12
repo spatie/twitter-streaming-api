@@ -8,7 +8,25 @@
 [![StyleCI](https://styleci.io/repos/78684837/shield?branch=master)](https://styleci.io/repos/78684837)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/twitter-streaming-api.svg?style=flat-square)](https://packagist.org/packages/spatie/twitter-streaming-api)
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
+Twitter provides a streaming api with which you can do interesting things such as listening for tweets with specific strings or action a user might take (such as liking a tweet, following someone, ...) This package provides with a way to very easily work with the API.
+
+Here's a quick example:
+
+```php
+PublicStream::create(
+    $accessToken,
+    $accessTokenSecret,
+    $consumerKey,
+    $consumerSecret
+)->whenHears('@spatie_be', function(array $tweet) {
+    echo "We got mentioned by {$tweet['user']['screen_name]} who tweeted $tweet['text']"
+})
+->startListening();
+```
+
+ There's no polling involved. The package will keep an open http connection with Twitter, events will be delivered in real time.
+
+Under the hood the [Phirehose package](https://github.com/fennb/phirehose) is used.
 
 ## Postcardware
 
@@ -26,22 +44,55 @@ You can install the package via composer:
 composer require spatie/twitter-streaming-api
 ```
 
+## Getting credentials
+
+TO DO
+
 ## Usage
 
-``` php
-$skeleton = new Spatie\TwitterStreamingApi();
-echo $skeleton->echoPhrase('Hello, Spatie!');
+This package currently can work with the public stream and the user stream. Both the `PublicStream` and `UserStream` classes provide a `startListening` function that kicks of the listening process. Unless you cancel it your PHP process will executed that function forever. No code after the function will be run.
+
+### The public stream
+
+The public stream can be used to listen for specific words that are being tweeted.
+
+The first parameter of `whenHears` must be a string or an array containing the word or words you want to listen for. The second parameter should be a callable that will be execute when one of your words get used on Twitter.
+
+```php
+PublicStream::create(
+    $accessToken,
+    $accessTokenSecret,
+    $consumerKey,
+    $consumerSecret
+)->whenHears('@spatie_be', function(array $tweet) {
+    echo "We got mentioned by {$tweet['user']['screen_name]} who tweeted $tweet['text']"
+})
+->startListening();
 ```
+
+### The user stream
+
+```php
+UserStream::create(
+    $accessToken,
+    $accessTokenSecret,
+    $consumerKey,
+    $consumerSecret
+)->onEvent(function(array $event) {
+    if ($event['event'] === 'favorite') {
+        echo "Our tweet {$event['target_object']['text']} got favorited by $event['source']['screen_name'];
+    }
+})
+->startListening();
+```
+
+## A word to the wise
+
+These API's work in realtime. It's possible that they will report back a lot of activity. If you need to do some heavy work processing that activity it's best to put that work in a queue so your listening process stays fast.
 
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information what has changed recently.
-
-## Testing
-
-``` bash
-$ composer test
-```
 
 ## Contributing
 
