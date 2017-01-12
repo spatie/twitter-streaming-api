@@ -11,8 +11,7 @@ class UserStream extends BaseStream
         string $accessSecret,
         string $consumerKey,
         string $consumerSecret
-    )
-    {
+    ) {
         $this->stream = $this->createStream(
             $accessToken,
             $accessSecret,
