@@ -8,7 +8,7 @@
 [![StyleCI](https://styleci.io/repos/78684837/shield?branch=master)](https://styleci.io/repos/78684837)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/twitter-streaming-api.svg?style=flat-square)](https://packagist.org/packages/spatie/twitter-streaming-api)
 
-Twitter provides a streaming API with which you can do interesting things such as listening for tweets that contain specific strings or actions a user might take (e.g. liking a tweet, following someone, ...). This package makes it very easy to work with the API.
+Twitter provides a streaming API with which you can do interesting things such as listening for tweets that contain specific strings or actions a user might take (e.g. liking a tweet, following someone,...). This package makes it very easy to work with the API.
 
 Here's a quick example:
 
@@ -20,11 +20,10 @@ PublicStream::create(
     $consumerSecret
 )->whenHears('@spatie_be', function(array $tweet) {
     echo "We got mentioned by {$tweet['user']['screen_name']} who tweeted {$tweet['text']}";
-})
-->startListening();
+})->startListening();
 ```
 
- There's no polling involved. The package will keep an open http connection with Twitter, events will be delivered in real time.
+ There's no polling involved. The package will keep an open https connection with Twitter, events will be delivered in real time.
 
 Under the hood the [Phirehose package](https://github.com/fennb/phirehose) is used.
 
@@ -70,8 +69,7 @@ PublicStream::create(
     $consumerSecret
 )->whenHears('@spatie_be', function(array $tweet) {
     echo "We got mentioned by {$tweet['user']['screen_name']} who tweeted {$tweet['text']}";
-})
-->startListening();
+})->startListening();
 ```
 
 ### The user stream
@@ -86,8 +84,7 @@ UserStream::create(
     if ($event['event'] === 'favorite') {
         echo "Our tweet {$event['target_object']['text']} got favorited by {$event['source']['screen_name']}";
     }
-})
-->startListening();
+})->startListening();
 ```
 
 ## A word to the wise

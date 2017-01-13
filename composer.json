@@ -25,10 +25,7 @@
     "autoload": {
         "psr-4": {
             "Spatie\\TwitterStreamingApi\\": "src"
-        },
-        "classmap": [
-            "../../../vendor/fennb/phirehose/lib"
-        ]
+        }
     },
     "autoload-dev": {
         "psr-4": {
@@ -40,5 +37,5 @@
     },
     "config": {
         "sort-packages": true
-  }
+    }
 }
