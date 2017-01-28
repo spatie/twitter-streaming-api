@@ -39,4 +39,23 @@ class PublicStream extends BaseStream
 
         return $this;
     }
+    
+    /**
+     * @param string|array $listenFor
+     * @param callable $whenTweets
+     *
+     * @return $this
+     */
+    public function whenTweets($listenFor, callable $whenTweets)
+    {
+        if (! is_array($listenFor)) {
+            $listenFor = [$listenFor];
+        }
+
+        $this->stream->setFollow($listenFor);
+
+        $this->stream->performOnStreamActivity($whenTweets);
+
+        return $this;
+    }
 }
