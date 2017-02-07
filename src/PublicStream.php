@@ -39,7 +39,7 @@ class PublicStream extends BaseStream
 
         return $this;
     }
-    
+
     /**
      * @param string|array $twitterUserIds
      * @param callable $whenTweets
