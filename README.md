@@ -47,7 +47,7 @@ composer require spatie/twitter-streaming-api
 
 In order to use this package you'll need to get some credentials from Twitter. Head over to the [Application management on Twitter](https://apps.twitter.com/) to create an application.
 
-Once you've created your application, click on the `Keys and access tokens` tab to retrieve your `consumer_key`, `consumer_secret`, `access_token` and `access_token_secret`. 
+Once you've created your application, click on the `Keys and access tokens` tab to retrieve your `consumer_key`, `consumer_secret`, `access_token` and `access_token_secret`.
 
 ![Keys and access tokens tab on Twitter](https://spatie.github.io/twitter-streaming-api/images/twitter.jpg)
 
@@ -57,7 +57,7 @@ Currently, this package works with the public stream and the user stream. Both t
 
 ### The public stream
 
-The public stream can be used to listen for specific words that are being tweeted.
+The public stream can be used to listen for specific words that are being tweeted or to follow one or more users tweets.
 
 The first parameter of `whenHears` must be a string or an array containing the word or words you want to listen for. The second parameter should be a callable that will be executed when one of your words is used on Twitter.
 
@@ -69,6 +69,19 @@ PublicStream::create(
     $consumerSecret
 )->whenHears('@spatie_be', function(array $tweet) {
     echo "We got mentioned by {$tweet['user']['screen_name']} who tweeted {$tweet['text']}";
+})->startListening();
+```
+
+The first parameter of `whenTweets` must be a string or an array containing the Twitter user ID or ID's you wish to follow. The second parameter should be a callable that will be executed when one of your followed users tweets.  Only public information relating to the Twitter user will be available.
+
+```php
+PublicStream::create(
+    $accessToken,
+    $accessTokenSecret,
+    $consumerKey,
+    $consumerSecret
+)->whenTweets('92947501', function(array $tweet) {
+    echo "{$tweet['user']['screen_name']} just tweeted {$tweet['text']}";
 })->startListening();
 ```
 
