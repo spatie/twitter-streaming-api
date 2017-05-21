@@ -24,6 +24,7 @@ class PublicStream extends BaseStream
     /**
      * @param string|array $listenFor
      * @param callable $whenHears
+     * @param string $lang
      *
      * @return $this
      */
@@ -34,9 +35,7 @@ class PublicStream extends BaseStream
         }
 
         $this->stream->setTrack($listenFor);
-        
         $this->stream->setLang($lang);
-        
         $this->stream->performOnStreamActivity($whenHears);
 
         return $this;
