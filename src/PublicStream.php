@@ -27,14 +27,16 @@ class PublicStream extends BaseStream
      *
      * @return $this
      */
-    public function whenHears($listenFor, callable $whenHears)
+    public function whenHears($listenFor, callable $whenHears, $lang = false)
     {
         if (! is_array($listenFor)) {
             $listenFor = [$listenFor];
         }
 
         $this->stream->setTrack($listenFor);
-
+        
+        $this->stream->setLang($lang);
+        
         $this->stream->performOnStreamActivity($whenHears);
 
         return $this;
