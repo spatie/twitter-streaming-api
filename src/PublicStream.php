@@ -59,6 +59,7 @@ class PublicStream extends BaseStream
 
         return $this;
     }
+    
     /**
      * @param string $lang
      * Restricts tweets to the given language, given by an ISO 639-1 code (http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
