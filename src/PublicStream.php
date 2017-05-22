@@ -28,14 +28,14 @@ class PublicStream extends BaseStream
      *
      * @return $this
      */
-    public function whenHears($listenFor, callable $whenHears, $lang = false)
+    public function whenHears($listenFor, callable $whenHears)
     {
         if (! is_array($listenFor)) {
             $listenFor = [$listenFor];
         }
 
         $this->stream->setTrack($listenFor);
-        $this->stream->setLang($lang);
+
         $this->stream->performOnStreamActivity($whenHears);
 
         return $this;
@@ -56,6 +56,18 @@ class PublicStream extends BaseStream
         $this->stream->setFollow($twitterUserIds);
 
         $this->stream->performOnStreamActivity($whenTweets);
+
+        return $this;
+    }
+    /**
+     * @param string $lang
+     * Restricts tweets to the given language, given by an ISO 639-1 code (http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
+     *
+     * @return $this
+     */
+    public function setLocale($lang)
+    {
+        $this->stream->setLang($lang);
 
         return $this;
     }
