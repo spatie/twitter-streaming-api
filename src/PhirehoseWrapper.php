@@ -49,4 +49,9 @@ class PhirehoseWrapper extends OauthPhirehose
     {
         $this->consume();
     }
+
+    public function stopListening()
+    {
+        $this->disconnect();
+    }
 }
