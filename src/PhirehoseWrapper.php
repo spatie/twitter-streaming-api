@@ -10,6 +10,9 @@ class PhirehoseWrapper extends OauthPhirehose
     /** @var callable */
     protected $onStreamActivity;
 
+    /** @var callable */
+    protected $checkFilterPredicates;
+
     /**
      * @param string $accessToken
      * @param string $accessSecret
@@ -30,6 +33,9 @@ class PhirehoseWrapper extends OauthPhirehose
 
         $this->onStreamActivity = function ($status) {
         };
+
+        $this->checkFilterPredicates = function() {
+        };
     }
 
     /**
@@ -48,5 +54,18 @@ class PhirehoseWrapper extends OauthPhirehose
     public function startListening()
     {
         $this->consume();
+    }
+
+    /**
+     * @param callable $checkFilterPredicates
+     */
+    public function setCheckFilterPredicates(callable $checkFilterPredicates)
+    {
+        $this->checkFilterPredicates = $checkFilterPredicates;
+    }
+
+    public function checkFilterPredicates()
+    {
+        ($this->checkFilterPredicates)($this);
     }
 }
