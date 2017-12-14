@@ -99,10 +99,10 @@ PublicStream::create(
     $consumerSecret
 )->whenHears('@spatie_be', function(array $tweet) {
     echo "We got mentioned by {$tweet['user']['screen_name']} who tweeted {$tweet['text']}";
-})->checkFilterPredicates(function($steam) {
+})->checkFilterPredicates(function($stream) {
     $trackIds = ExternalStorage::get('TwitterTrackIds');
-    if ($trackIds != $steam->getTrack()) {
-        $steam->setTrack($trackIds);
+    if ($trackIds != $stream->getTrack()) {
+        $stream->setTrack($trackIds);
     }
 })->startListening();
 ```
