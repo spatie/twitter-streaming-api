@@ -75,7 +75,6 @@ class PublicStream extends BaseStream
         return $this;
     }
 
-
     /**
      * This method allows you to change the filter.
      * @param callable $checkFilterPredicates

@@ -34,7 +34,7 @@ class PhirehoseWrapper extends OauthPhirehose
         $this->onStreamActivity = function ($status) {
         };
 
-        $this->checkFilterPredicates = function() {
+        $this->checkFilterPredicates = function () {
         };
     }
 
