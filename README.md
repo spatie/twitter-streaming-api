@@ -85,6 +85,29 @@ PublicStream::create(
 })->startListening();
 ```
 
+## Change filter
+
+This method is only required/desirable if you're using the filter method. It is called every ~5 seconds and is responsible for checking if filter predicates have changed for your application.
+
+Phirehose does most of the hard work for you in terms of ensuring that predicate updates happen as soon as possible (but not too often). All you have to do is make calls to setTrack() and setFollow() appropriately, and Phirehose will handle the reconnection/etc. For example, it may look something like (partial example):
+
+```php
+PublicStream::create(
+    $accessToken,
+    $accessTokenSecret,
+    $consumerKey,
+    $consumerSecret
+)->whenHears('@spatie_be', function(array $tweet) {
+    echo "We got mentioned by {$tweet['user']['screen_name']} who tweeted {$tweet['text']}";
+})->checkFilterPredicates(function($stream) {
+    $trackIds = ExternalStorage::get('TwitterTrackIds');
+    if ($trackIds != $stream->getTrack()) {
+        $stream->setTrack($trackIds);
+    }
+})->startListening();
+```
+
+
 ### The user stream
 
 ```php
