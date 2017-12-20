@@ -85,6 +85,37 @@ PublicStream::create(
 })->startListening();
 ```
 
+## Check filter predicates
+
+In most cases, your script will interacts with the Twitter streaming API as a daemon. To be able to monitor changes in filter predicates, you can use checkFilterPredicates() method. 
+It is called every ~5 seconds and is responsible for checking if filter predicates have changed for your application.
+
+Package does most of the hard work for you in terms of ensuring that predicate updates happen as soon as possible (but not too often). All you have to do is make calls to setTrack() and setFollow() appropriately, and package will handle the reconnection/etc. For example, it may look something like (partial example):
+
+```php
+PublicStream::create(
+    $accessToken,
+    $accessTokenSecret,
+    $consumerKey,
+    $consumerSecret
+)->whenHears('@spatie_be', function(array $tweet) {
+    echo "We got mentioned by {$tweet['user']['screen_name']} who tweeted {$tweet['text']}";
+})->checkFilterPredicates(function($stream) {
+    $trackIds = ExternalStorage::get('TwitterTrackIds');
+    if ($trackIds != $stream->getTrack()) {
+        $stream->setTrack($trackIds);
+    }
+})->startListening();
+```
+
+If you run in an external script something like
+```php
+ExternalStorage::set('TwitterTrackIds', ['@spatie_be', '@laravelphp'])
+```
+then the method in the example above will change the filter predicates and reconnect to the Twitter streaming API.
+
+Note that ExternalStorage::get/set is not a native methods and is just being used for illustrative purposes. In most cases you can use some kind of database or cache.
+
 ### The user stream
 
 ```php
