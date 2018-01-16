@@ -42,6 +42,37 @@ class PublicStream extends BaseStream
     }
 
     /**
+     * Specify a set of bounding boxes to track as an array containing one or
+     * more 4 element lon/lat pairs denoting `[<south-west point longitude>,
+     * <south-west point latitude>, <north-east point longitude>,
+     * <north-east point latitude>]`. Only tweets that are both created using
+     * the Geotagging API and are placed from within one of the tracked bounding
+     * boxes will be included in the stream. The user's location field is not
+     * used to filter tweets.
+     *
+     * **Example:**
+     *     PublicStream::create($accessToken, $accessTokenSecret, $consumerKey, $consumerSecret)
+     *         ->whenFrom([
+     *             [-122.75, 36.8, -121.75, 37.8], // San Francisco
+     *             [-74, 40, -73, 41],             // New York
+     *         ], function(array $tweet) {
+     *             echo "{$tweet['user']['screen_name']} just tweeted {$tweet['text']} from SF or NYC";
+     *         })->startListening();
+     *
+     * @param array    $boundingBoxes
+     * @param callable $whenFrom
+     * @return $this
+     */
+    public function whenFrom(array $boundingBoxes, callable $whenFrom)
+    {
+        $this->stream->setLocations($boundingBoxes);
+
+        $this->stream->performOnStreamActivity($whenFrom);
+
+        return $this;
+    }
+
+    /**
      * @param string|array $twitterUserIds
      * @param callable $whenTweets
      *
