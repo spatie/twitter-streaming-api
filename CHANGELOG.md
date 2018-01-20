@@ -2,6 +2,10 @@
 
 All notable changes to `twitter-streaming-api` will be documented in this file
 
+## 1.3.0 - 2018-01-20
+
+- add ability to track tweets based on location
+
 ## 1.2.0 - 2017-05-23
 
 - add `setLocale`
