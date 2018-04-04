@@ -2,6 +2,10 @@
 
 All notable changes to `twitter-streaming-api` will be documented in this file
 
+## 1.4.1 - 2018-04-04
+
+- fix compatiblity with PHP 7.2 by requiring a specifc version of the phirehose dependency
+
 ## 1.4.0 - 2018-01-20
 
 - add ability to track tweets based on location
