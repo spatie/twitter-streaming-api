@@ -2,6 +2,10 @@
 
 All notable changes to `twitter-streaming-api` will be documented in this file
 
+## 1.4.2 - 2020-12-11
+
+- allow PHP 8
+
 ## 1.4.1 - 2018-04-04
 
 - fix compatiblity with PHP 7.2 by requiring a specifc version of the phirehose dependency
