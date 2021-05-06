@@ -2,8 +2,8 @@
 
 namespace Spatie\TwitterStreamingApi;
 
-use Phirehose;
 use OauthPhirehose;
+use Phirehose;
 
 class PhirehoseWrapper extends OauthPhirehose
 {
@@ -20,7 +20,7 @@ class PhirehoseWrapper extends OauthPhirehose
      * @param string $consumerSecret
      * @param string $method
      */
-    public function __construct($accessToken, $accessSecret, $consumerKey, $consumerSecret, $method = Phirehose::METHOD_FILTER)
+    public function __construct(string $accessToken, string $accessSecret, string $consumerKey, string $consumerSecret, string $method = Phirehose::METHOD_FILTER)
     {
         parent::__construct($accessToken, $accessSecret, $method);
 
@@ -28,12 +28,12 @@ class PhirehoseWrapper extends OauthPhirehose
         $this->consumerSecret = $consumerSecret;
 
         if ($method === Phirehose::METHOD_USER) {
+            /** @psalm-suppress InternalProperty */
             $this->URL_BASE = 'https://userstream.twitter.com/1.1/';
         }
 
-        $this->onStreamActivity = function ($status) {
+        $this->onStreamActivity = function () {
         };
-
         $this->checkFilterPredicates = function () {
         };
     }
@@ -41,7 +41,7 @@ class PhirehoseWrapper extends OauthPhirehose
     /**
      * @param mixed $status
      */
-    public function enqueueStatus($status)
+    public function enqueueStatus($status): void
     {
         ($this->onStreamActivity)(json_decode($status, true));
     }
@@ -56,9 +56,6 @@ class PhirehoseWrapper extends OauthPhirehose
         $this->consume();
     }
 
-    /**
-     * @param callable $checkFilterPredicates
-     */
     public function setCheckFilterPredicates(callable $checkFilterPredicates)
     {
         $this->checkFilterPredicates = $checkFilterPredicates;
