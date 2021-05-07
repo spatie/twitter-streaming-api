@@ -11,8 +11,7 @@ class PublicStream extends BaseStream
         string $accessSecret,
         string $consumerKey,
         string $consumerSecret
-    )
-    {
+    ) {
         $this->stream = $this->createStream(
             $accessToken,
             $accessSecret,
@@ -22,9 +21,9 @@ class PublicStream extends BaseStream
         );
     }
 
-    public function whenHears(string|array $listenFor, callable $whenHears): self
+    public function whenHears(string | array $listenFor, callable $whenHears): self
     {
-        if (!is_array($listenFor)) {
+        if (! is_array($listenFor)) {
             $listenFor = [$listenFor];
         }
 
@@ -44,9 +43,9 @@ class PublicStream extends BaseStream
         return $this;
     }
 
-    public function whenTweets(string|array $twitterUserIds, callable $whenTweets): self
+    public function whenTweets(string | array $twitterUserIds, callable $whenTweets): self
     {
-        if (!is_array($twitterUserIds)) {
+        if (! is_array($twitterUserIds)) {
             $twitterUserIds = [$twitterUserIds];
         }
 
