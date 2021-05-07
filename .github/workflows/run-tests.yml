@@ -12,8 +12,8 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                os: [ ubuntu-latest, windows-latest ]
-                php: [ 7.0, 7.1, 7.2, 7.3, 7.4, 8.0 ]
+                os: [ubuntu-latest, windows-latest]
+                php: [8.0]
                 stability: [ prefer-stable ]
 
         name: P${{ matrix.php }} - ${{ matrix.stability }} - ${{ matrix.os }}
