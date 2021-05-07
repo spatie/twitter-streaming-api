@@ -21,12 +21,7 @@ class UserStream extends BaseStream
         );
     }
 
-    /**
-     * @param callable $onEvent
-     *
-     * @return $this
-     */
-    public function onEvent(callable $onEvent)
+    public function onEvent(callable $onEvent): self
     {
         $this->stream->performOnStreamActivity($onEvent);
 

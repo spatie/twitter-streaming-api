@@ -11,7 +11,8 @@ class PublicStream extends BaseStream
         string $accessSecret,
         string $consumerKey,
         string $consumerSecret
-    ) {
+    )
+    {
         $this->stream = $this->createStream(
             $accessToken,
             $accessSecret,
@@ -21,16 +22,9 @@ class PublicStream extends BaseStream
         );
     }
 
-    /**
-     * @param string|array $listenFor
-     * @param callable $whenHears
-     * @param string $lang
-     *
-     * @return $this
-     */
-    public function whenHears($listenFor, callable $whenHears)
+    public function whenHears(string|array $listenFor, callable $whenHears): self
     {
-        if (! is_array($listenFor)) {
+        if (!is_array($listenFor)) {
             $listenFor = [$listenFor];
         }
 
@@ -41,29 +35,7 @@ class PublicStream extends BaseStream
         return $this;
     }
 
-    /**
-     * Specify a set of bounding boxes to track as an array containing one or
-     * more 4 element lon/lat pairs denoting `[<south-west point longitude>,
-     * <south-west point latitude>, <north-east point longitude>,
-     * <north-east point latitude>]`. Only tweets that are both created using
-     * the Geotagging API and are placed from within one of the tracked bounding
-     * boxes will be included in the stream. The user's location field is not
-     * used to filter tweets.
-     *
-     * **Example:**
-     *     PublicStream::create($accessToken, $accessTokenSecret, $consumerKey, $consumerSecret)
-     *         ->whenFrom([
-     *             [-122.75, 36.8, -121.75, 37.8], // San Francisco
-     *             [-74, 40, -73, 41],             // New York
-     *         ], function(array $tweet) {
-     *             echo "{$tweet['user']['screen_name']} just tweeted {$tweet['text']} from SF or NYC";
-     *         })->startListening();
-     *
-     * @param array    $boundingBoxes
-     * @param callable $whenFrom
-     * @return $this
-     */
-    public function whenFrom(array $boundingBoxes, callable $whenFrom)
+    public function whenFrom(array $boundingBoxes, callable $whenFrom): self
     {
         $this->stream->setLocations($boundingBoxes);
 
@@ -72,15 +44,9 @@ class PublicStream extends BaseStream
         return $this;
     }
 
-    /**
-     * @param string|array $twitterUserIds
-     * @param callable $whenTweets
-     *
-     * @return $this
-     */
-    public function whenTweets($twitterUserIds, callable $whenTweets)
+    public function whenTweets(string|array $twitterUserIds, callable $whenTweets): self
     {
-        if (! is_array($twitterUserIds)) {
+        if (!is_array($twitterUserIds)) {
             $twitterUserIds = [$twitterUserIds];
         }
 
@@ -91,28 +57,14 @@ class PublicStream extends BaseStream
         return $this;
     }
 
-    /**
-     * Restricts tweets to the given language, given by an ISO 639-1 code
-     * (http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes).
-     *
-     * @param string $lang
-     *
-     * @return $this
-     */
-    public function setLocale(string $lang)
+    public function setLocale(string $lang): self
     {
         $this->stream->setLang($lang);
 
         return $this;
     }
 
-    /**
-     * This method allows you to change the filter.
-     * @param callable $checkFilterPredicates
-     *
-     * @return $this
-     */
-    public function checkFilterPredicates(callable $checkFilterPredicates)
+    public function checkFilterPredicates(callable $checkFilterPredicates): self
     {
         $this->stream->setCheckFilterPredicates($checkFilterPredicates);
 
