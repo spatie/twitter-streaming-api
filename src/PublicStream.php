@@ -2,71 +2,80 @@
 
 namespace Spatie\TwitterStreamingApi;
 
-use Phirehose;
+use RWC\TwitterStream\Rule;
+use RWC\TwitterStream\RuleBuilder;
+use RWC\TwitterStream\Sets;
+use RWC\TwitterStream\Support\Arr;
+use RWC\TwitterStream\TwitterStream;
 
-class PublicStream extends BaseStream
+class PublicStream
 {
-    public function __construct(
-        string $accessToken,
-        string $accessSecret,
-        string $consumerKey,
-        string $consumerSecret
-    ) {
-        $this->stream = $this->createStream(
-            $accessToken,
-            $accessSecret,
-            $consumerKey,
-            $consumerSecret,
-            Phirehose::METHOD_FILTER
-        );
+    protected TwitterStream $stream;
+
+    /** @var callable */
+    protected $onTweet;
+    protected RuleBuilder $rule;
+
+    public function __construct(string $bearerToken, string $apiKey, string $apiSecretKey)
+    {
+        $this->stream = new TwitterStream($bearerToken, $apiKey, $apiSecretKey);
+        $this->rule = RuleBuilder::create();
+    }
+
+    public static function create(string $bearerToken, string $apiKey, string $apiSecretKey): static
+    {
+        return new self($bearerToken, $apiKey, $apiSecretKey);
     }
 
     public function whenHears(string | array $listenFor, callable $whenHears): self
     {
-        if (! is_array($listenFor)) {
-            $listenFor = [$listenFor];
-        }
+        $this->rule->raw(array_reduce(Arr::wrap($listenFor), static function ($_, $listener) {
+            if (empty($_)) {
+                return $listener;
+            }
 
-        $this->stream->setTrack($listenFor);
-
-        $this->stream->performOnStreamActivity($whenHears);
+            return $_ . ' OR ' . $listener;
+        }));
+        $this->onTweet = $whenHears;
 
         return $this;
     }
 
     public function whenFrom(array $boundingBoxes, callable $whenFrom): self
     {
-        $this->stream->setLocations($boundingBoxes);
-
-        $this->stream->performOnStreamActivity($whenFrom);
+        $this->rule->boundingBox($boundingBoxes);
+        $this->onTweet = $whenFrom;
 
         return $this;
     }
 
     public function whenTweets(string | array $twitterUserIds, callable $whenTweets): self
     {
-        if (! is_array($twitterUserIds)) {
-            $twitterUserIds = [$twitterUserIds];
-        }
-
-        $this->stream->setFollow($twitterUserIds);
-
-        $this->stream->performOnStreamActivity($whenTweets);
+        $this->rule->from($twitterUserIds);
+        $this->onTweet = $whenTweets;
 
         return $this;
     }
 
     public function setLocale(string $lang): self
     {
-        $this->stream->setLang($lang);
+        $this->rule->locale($lang);
 
         return $this;
     }
 
-    public function checkFilterPredicates(callable $checkFilterPredicates): self
+    public function startListening(Sets $sets = null): void
     {
-        $this->stream->setCheckFilterPredicates($checkFilterPredicates);
+        // Delete old rules
+        Rule::deleteBulk(...Rule::all());
+        $this->rule->save();
 
-        return $this;
+        foreach ($this->stream->filteredTweets($sets) as $tweet) {
+            if (is_null($tweet)) {
+                continue;
+            }
+
+            call_user_func($this->onTweet, $tweet);
+        }
     }
 }
