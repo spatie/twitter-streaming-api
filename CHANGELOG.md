@@ -2,6 +2,10 @@
 
 All notable changes to `twitter-streaming-api` will be documented in this file
 
+## 2.0.0 - 2021-05-17
+
+- require PHP 8 + use improved dependancy (#30)
+
 ## 1.4.2 - 2020-12-11
 
 - allow PHP 8
