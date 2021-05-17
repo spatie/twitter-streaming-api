@@ -24,8 +24,6 @@ PublicStream::create(
 There's no polling involved. The package will keep an open https connection with Twitter, events will be delivered in
 real time.
 
-Under the hood the [Phirehose package](https://github.com/fennb/phirehose) is used.
-
 ## Support us
 
 [<img src="https://github-ads.s3.eu-central-1.amazonaws.com/twitter-streaming-api.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/twitter-streaming-api)
