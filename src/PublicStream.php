@@ -51,10 +51,24 @@ class PublicStream
 
     public function whenTweets(string | array $twitterUserIds, callable $whenTweets): self
     {
-        $this->rule->from($twitterUserIds);
+        if (is_array($twitterUserIds)) {
+            $this->applyFromMultipleUserIds($twitterUserIds);
+        } else {
+            $this->rule->from($twitterUserIds);
+        }
         $this->onTweet = $whenTweets;
-
         return $this;
+    }
+
+    protected function applyFromMultipleUserIds(array $twitterUserIds): void
+    {
+        foreach ($twitterUserIds as $key => $uid) {
+            $this->rule->from($uid);
+
+            if ($key !== array_key_last($twitterUserIds)) {
+                $this->rule->or();
+            }
+        }
     }
 
     public function setLocale(string $lang): self
