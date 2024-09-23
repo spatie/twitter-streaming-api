@@ -32,10 +32,10 @@ jobs:
         run: |
           echo "::add-matcher::${{ runner.tool_cache }}/php.json"
           echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"
+
       - name: Install dependencies
         run: |
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
-      - name: Lint
-        run: vendor/bin/php-cs-fixer fix
+
       - name: Execute tests
         run: vendor/bin/phpunit
