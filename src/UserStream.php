@@ -32,7 +32,7 @@ class UserStream
         return $this;
     }
 
-    public function startListening(Sets $sets = null): void
+    public function startListening(?Sets $sets = null): void
     {
         // Delete old rules
         Rule::deleteBulk(...Rule::all());
