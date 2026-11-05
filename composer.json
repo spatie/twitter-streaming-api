@@ -23,7 +23,7 @@
         "phpunit/phpunit": "^9",
         "spatie/laravel-ray": "^1",
         "friendsofphp/php-cs-fixer": "^3.0",
-        "vimeo/psalm": "^5"
+        "vimeo/psalm": "^5 || ^7"
     },
     "autoload": {
         "psr-4": {
