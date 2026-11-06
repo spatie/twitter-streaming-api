@@ -2,46 +2,35 @@
 
 namespace Spatie\TwitterStreamingApi;
 
-use RWC\TwitterStream\Rule;
-use RWC\TwitterStream\RuleBuilder;
-use RWC\TwitterStream\Sets;
-use RWC\TwitterStream\TwitterStream;
+use Felix\TwitterStream\Streams\FilteredStream;
+use Felix\TwitterStream\TwitterConnection;
 
 class UserStream
 {
     protected string $handle;
-    protected TwitterStream $stream;
-    /** @var callable */
-    protected $onTweet;
 
-    public function __construct(string $handle, string $bearerToken, string $apiKey, string $apiSecretKey)
+    protected PublicStream $stream;
+
+    public function __construct(string $handle, string|TwitterConnection $bearerToken)
     {
         $this->handle = $handle;
-        $this->stream = new TwitterStream($bearerToken, $apiKey, $apiSecretKey);
+        $this->stream = new PublicStream($bearerToken);
     }
 
-    public static function create(string $handle, string $bearerToken, string $apiKey, string $apiSecretKey): static
+    public static function create(string $handle, string|TwitterConnection $bearerToken): static
     {
-        return new self($handle, $bearerToken, $apiKey, $apiSecretKey);
+        return new static($handle, $bearerToken);
     }
 
-    public function onEvent(callable $onTweet): static
+    public function onTweet(callable $onTweet): static
     {
-        $this->onTweet = $onTweet;
+        $this->stream->whenTweets($this->handle, $onTweet);
 
         return $this;
     }
 
-    public function startListening(?Sets $sets = null): void
+    public function startListening(?FilteredStream $stream = null): void
     {
-        // Delete old rules
-        Rule::deleteBulk(...Rule::all());
-        RuleBuilder::create()
-            ->from($this->handle)
-            ->save();
-
-        foreach ($this->stream->filteredTweets($sets) as $tweet) {
-            call_user_func($this->onTweet, $tweet);
-        }
+        $this->stream->startListening($stream);
     }
 }

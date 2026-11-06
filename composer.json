@@ -16,14 +16,12 @@
         }
     ],
     "require": {
-        "php": "^8.0",
-        "redwebcreation/twitter-stream-api": "^0.2"
+        "php": "^8.5",
+        "redwebcreation/twitter-stream-api": "^2.2.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9",
-        "spatie/laravel-ray": "^1",
-        "friendsofphp/php-cs-fixer": "^3.0",
-        "vimeo/psalm": "^5"
+        "friendsofphp/php-cs-fixer": "^3.95.28",
+        "phpunit/phpunit": "^13.4.6"
     },
     "autoload": {
         "psr-4": {
@@ -37,7 +35,7 @@
     },
     "scripts": {
         "lint": "./vendor/bin/php-cs-fixer fix",
-        "psalm": "./vendor/bin/psalm",
+        "test-lint": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
         "test": "./vendor/bin/phpunit",
         "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
     },

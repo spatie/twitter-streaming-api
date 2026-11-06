@@ -5,24 +5,28 @@
 [![run-tests](https://github.com/spatie/twitter-streaming-api/actions/workflows/run-tests.yml/badge.svg)](https://github.com/spatie/twitter-streaming-api/actions/workflows/run-tests.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/spatie/twitter-streaming-api.svg?style=flat-square)](https://packagist.org/packages/spatie/twitter-streaming-api)
 
-Twitter provides a streaming API with which you can do interesting things such as listening for tweets that contain
-specific strings or actions a user might take (e.g. liking a tweet, following someone,...). This package makes it very
-easy to work with the API.
+Listen for public posts matching keywords, authors, languages, or bounding boxes using the X API v2
+[Filtered Stream](https://docs.x.com/x-api/posts/filtered-stream/introduction).
 
-Here's a quick example:
+This package does **not** subscribe to likes, follows, private activity, or legacy user events. Those require a separate
+[X Activity API](https://docs.x.com/x-api/activity/introduction) integration with its own subscriptions and authentication.
+
+Requires **PHP 8.5+**. CI exercises PHP 8.5 and PHP 8.6 development builds on Linux and Windows.
 
 ```php
-PublicStream::create(
-    $bearerToken,
-    $apiKey,
-    $apiSecretKey
-)->whenHears('@spatie_be', function(array $tweet) {
-    echo "We got mentioned by {$tweet['user']['screen_name']} who tweeted {$tweet['text']}";
-})->startListening();
+use Spatie\TwitterStreamingApi\PublicStream;
+
+PublicStream::create($bearerToken)
+    ->whenHears('@spatie_be', function (object $message) {
+        if (isset($message->data)) {
+            echo $message->data->text;
+        }
+    })
+    ->startListening();
 ```
 
-There's no polling involved. The package will keep an open https connection with Twitter, events will be delivered in
-real time.
+There is no polling. The client reads a persistent HTTPS stream until it closes or your callback throws. Reconnection,
+backoff, application supervision, and fast callback processing are the caller's responsibility.
 
 ## Support us
 
@@ -54,114 +58,124 @@ composer require spatie/twitter-streaming-api
 
 ## Getting credentials
 
-In order to use this package you'll need to get some credentials from Twitter. Head over to
-the [Developer Portal on Twitter](https://developer.twitter.com/) to create an application.
-
-Once you've created your application, click on the `Keys and tokens` tab to retrieve your `bearer_token`
-, `api_key`, `api_secret_key`.
-![Keys and tokens tab on Twitter](docs/tokens.png)
+Create an app in the [X Developer Console](https://developer.x.com/) and obtain its app Bearer Token. Your account must
+have access to Filtered Stream and the operators you use. Access, billing, rule limits, and geo restrictions are controlled
+by X; installing this package does not grant them. No API key or API secret argument is needed for these requests.
 
 ## Usage
 
-Currently, this package works with the public stream and the user stream. Both the `PublicStream` and `UserStream`
-classes provide a `startListening` function that kicks of the listening process. Unless you cancel it your PHP process
-will execute that function forever. No code after the function will be run.
+**Rule ownership:** `startListening()` deletes **all existing filtered-stream rules for the app**, then adds the configured
+rule before connecting. Use a dedicated app; do not share these rules with other consumers. Starting again replaces the
+rules again. API and callback exceptions propagate to the caller.
 
-### The public stream
-
-The public stream can be used to listen for specific words that are being tweeted, receive Tweets that are being sent
-from specific locations or to follow one or more users tweets.
-
-#### Listen for Tweets containing specific words
-
-The first parameter of `whenHears` must be a string or an array containing the word or words you want to listen for. The
-second parameter should be a callable that will be executed when one of your words is used on Twitter.
+Callbacks receive the upstream client's decoded **object envelope**, not a legacy tweet array:
 
 ```php
-PublicStream::create(
-    $bearerToken,
-    $apiKey,
-    $apiSecretKey
-)->whenHears('@spatie_be', function(array $tweet) {
-    echo "We got mentioned by {$tweet['user']['screen_name']} who tweeted {$tweet['text']}";
-})->startListening();
+$message->data->id;
+$message->data->text;
+$message->includes;       // Only when returned by the API.
+$message->matching_rules;
 ```
 
-#### Listen for Tweets from specific locations
+Keep-alive blank lines are not delivered to callbacks. Handle envelopes without `data`, including any streamed error
+information your application receives. User details are not automatically hydrated at `$tweet['user']`.
 
-The first parameter of `whenFrom` must be an array containing one or more bounding boxes, each as an array of 4 element
-lon/lat pairs (looking
-like `[<south-west point longitude>, <south-west point latitude>, <north-east point longitude>,  <north-east point latitude>]`)
-. The second parameter should be a callable that will be executed when a Tweet from one of your tracked locations is
-being sent.
+### Keywords and languages
 
-**Track all tweets from San Francisco or New York:**
+`whenHears` accepts a keyword/rule string or an array of alternatives. Arrays are grouped with OR, so the language filter
+applies to every alternative. Different filter methods chained together are combined with AND; the last callback is used.
 
 ```php
-PublicStream::create(
-    $bearerToken,
-    $apiKey,
-    $apiSecretKey
-)->whenFrom([
-    [-122.75, 36.8, -121.75, 37.8], // San Francisco
-    [-74, 40, -73, 41],             // New York
-], function(array $tweet) {
-        echo "{$tweet['user']['screen_name']} just tweeted {$tweet['text']} from SF or NYC";
-})->startListening();
+PublicStream::create($bearerToken)
+    ->whenHears(['php', 'laravel'], function (object $message) {
+        // Process $message->data when present.
+    })
+    ->setLocale('en')
+    ->startListening();
 ```
 
-**Track all tweets with a location (from all over the world):**
+This submits `(php OR laravel) lang:en`. Raw strings use X's rule syntax; consult the
+[rule-building guide](https://docs.x.com/x-api/posts/filtered-stream/integrate/build-a-rule) for quoting and operators.
+
+### Posts by authors
+
+`whenTweets` accepts an author handle or an array of alternative handles, without `@`. For example:
 
 ```php
-PublicStream::create(
-    $bearerToken,
-    $apiKey,
-    $apiSecretKey
-)->whenFrom([
-        [-180, -90, 180, 90] // Whole world
-], function(array $tweet) {
-    echo "{$tweet['user']['screen_name']} just tweeted {$tweet['text']} with a location attached";
-})->startListening();
+PublicStream::create($bearerToken)
+    ->whenTweets(['spatie_be', 'freekmurze'], function (object $message) {
+        // Matches either author, not both simultaneously.
+    })
+    ->startListening();
 ```
 
-#### Listen for Tweets from specific users
-
-The first parameter of `whenTweets` must be a string or an array containing the Twitter user ID or IDs you wish to
-follow. The second parameter should be a callable that will be executed when one of your followed users tweets. Only
-public information relating to the Twitter user will be available.
+`UserStream` is a convenience wrapper for a single `from:handle` post filter, **not an activity stream**:
 
 ```php
-PublicStream::create(
-    $bearerToken,
-    $apiKey,
-    $apiSecretKey
-)->whenTweets('92947501', function(array $tweet) {
-    echo "{$tweet['user']['screen_name']} just tweeted {$tweet['text']}";
-})->startListening();
+use Spatie\TwitterStreamingApi\UserStream;
+
+UserStream::create('spatie_be', $bearerToken)
+    ->onTweet(function (object $message) {
+        // Public posts authored by spatie_be, not likes or follows.
+    })
+    ->startListening();
 ```
 
-### The user stream
+### Locations
+
+`whenFrom` accepts one or more `[west longitude, south latitude, east longitude, north latitude]` boxes. Multiple boxes
+are grouped with OR. X validates operator access and permitted box dimensions; a whole-world box is not promised.
 
 ```php
-UserStream::create(
-    'your_handle',
-    $bearerToken,
-    $apiKey,
-    $apiSecretKey
-)->onEvent(function(array $event) {
-    if ($event['event'] === 'favorite') {
-        echo "Our tweet {$event['target_object']['text']} got favorited by {$event['source']['screen_name']}";
-    }
-})->startListening();
+PublicStream::create($bearerToken)
+    ->whenFrom([[-74, 40, -73, 41]], function (object $message) {
+        // Process matching geolocated posts.
+    })
+    ->startListening();
 ```
 
-## A word to the wise
+### Stream options
 
-These APIs work in realtime, so they could report a lot of activity. If you need to do some heavy work processing that
-activity, it's best to put that work in a queue to keep your listening process fast.
+Pass a configured `Felix\TwitterStream\Streams\FilteredStream` to `startListening()` for fields, expansions, or a post limit:
 
-If you need more advanced functionalities, consider checking
-out [redwebcreation/twitter-streaming-api](https://github.com/redwebcreation/twitter-streaming-api).
+```php
+use Felix\TwitterStream\Streams\FilteredStream;
+
+$options = (new FilteredStream())
+    ->fields(['tweet' => ['author_id']])
+    ->expansions('author_id')
+    ->withTweetLimit(100);
+
+$publicStream->startListening($options);
+```
+
+Both factories also accept a configured `Felix\TwitterStream\TwitterConnection` instead of a token, for example to use
+its `setClient()` transport configuration. A custom HTTP client must supply its own authentication headers.
+
+## Upgrading from 2.x
+
+- PHP 8.0–8.4 and the 0.x streaming client are no longer supported. The client is now `redwebcreation/twitter-stream-api` 2.2+.
+- Pass only the Bearer Token (or a `TwitterConnection`) to `PublicStream::create()`. Pass a handle and token to `UserStream::create()`.
+- Use object envelopes (`$message->data->text`) instead of legacy tweet arrays or top-level `text`/`user` fields.
+- Rename `UserStream::onEvent()` to `onTweet()`. The old likes/follows example was never implemented by the filtered-post path; no legacy event translation is provided.
+- Replace `RWC\TwitterStream\Sets` with a configured `Felix\TwitterStream\Streams\FilteredStream`.
+- Author arrays now use OR, bounding boxes use the 2.2 builder signature, and `setLocale()` uses the `lang` operator.
+
+## Testing and limitations
+
+```bash
+composer test
+composer test-lint
+composer test-coverage # Requires a coverage driver such as PCOV or Xdebug.
+```
+
+The suite exercises real rule generation, HTTP request bodies, stream parsing, payload delivery, limits, restart behavior,
+and error propagation using a mocked HTTP transport. It makes no authenticated X calls and proves neither account
+entitlement nor live delivery. The latest upstream client (2.2.1) currently emits a PHP implicit-nullability deprecation
+from `RuleManager::save()` on PHP 8.5/8.6. The lowest-dependency resolution also emits a Guzzle promises class-name
+deprecation on PHP 8.6. These remain visible in test output, not suppressed.
+
+For lower-level functionality, see [the upstream client](https://github.com/felixdorn/twitter-stream-api).
 
 ## Changelog
 

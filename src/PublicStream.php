@@ -2,80 +2,113 @@
 
 namespace Spatie\TwitterStreamingApi;
 
-use RWC\TwitterStream\Rule;
-use RWC\TwitterStream\RuleBuilder;
-use RWC\TwitterStream\Sets;
-use RWC\TwitterStream\Support\Arr;
-use RWC\TwitterStream\TwitterStream;
+use Closure;
+use Felix\TwitterStream\RuleBuilder;
+use Felix\TwitterStream\RuleManager;
+use Felix\TwitterStream\Streams\FilteredStream;
+use Felix\TwitterStream\TwitterConnection;
+use InvalidArgumentException;
+use LogicException;
 
 class PublicStream
 {
-    protected TwitterStream $stream;
+    protected TwitterConnection $connection;
 
-    /** @var callable */
-    protected $onTweet;
+    protected ?Closure $onTweet = null;
+
     protected RuleBuilder $rule;
 
-    public function __construct(string $bearerToken, string $apiKey, string $apiSecretKey)
+    public function __construct(string|TwitterConnection $bearerToken)
     {
-        $this->stream = new TwitterStream($bearerToken, $apiKey, $apiSecretKey);
-        $this->rule = RuleBuilder::create();
+        $this->connection = $bearerToken instanceof TwitterConnection
+            ? $bearerToken
+            : new TwitterConnection($bearerToken);
+
+        $this->rule = new RuleBuilder();
     }
 
-    public static function create(string $bearerToken, string $apiKey, string $apiSecretKey): static
+    public static function create(string|TwitterConnection $bearerToken): static
     {
-        return new self($bearerToken, $apiKey, $apiSecretKey);
+        return new static($bearerToken);
     }
 
-    public function whenHears(string | array $listenFor, callable $whenHears): self
+    public function whenHears(string|array $listenFor, callable $whenHears): self
     {
-        $this->rule->raw(array_reduce(Arr::wrap($listenFor), static function ($_, $listener) {
-            if (empty($_)) {
-                return $listener;
-            }
+        if ($listenFor === []) {
+            throw new InvalidArgumentException('Provide at least one keyword.');
+        }
 
-            return $_ . ' OR ' . $listener;
-        }));
-        $this->onTweet = $whenHears;
+        if ($listenFor === '') {
+            throw new InvalidArgumentException('Provide at least one keyword.');
+        }
+
+        $this->rule->group(fn (RuleBuilder $rule) => $rule->raw($listenFor));
+        $this->onTweet = Closure::fromCallable($whenHears);
 
         return $this;
     }
 
     public function whenFrom(array $boundingBoxes, callable $whenFrom): self
     {
-        $this->rule->boundingBox($boundingBoxes);
-        $this->onTweet = $whenFrom;
+        if ($boundingBoxes === []) {
+            throw new InvalidArgumentException('Provide at least one bounding box.');
+        }
+
+        $this->rule->group(function (RuleBuilder $rule) use ($boundingBoxes) {
+            foreach (array_values($boundingBoxes) as $index => $box) {
+                $index === 0
+                    ? $rule->boundingBox(...$box)
+                    : $rule->orBoundingBox(...$box);
+            }
+        });
+
+        $this->onTweet = Closure::fromCallable($whenFrom);
 
         return $this;
     }
 
-    public function whenTweets(string | array $twitterUserIds, callable $whenTweets): self
+    public function whenTweets(string|array $twitterUsers, callable $whenTweets): self
     {
-        $this->rule->from($twitterUserIds);
-        $this->onTweet = $whenTweets;
+        if ($twitterUsers === []) {
+            throw new InvalidArgumentException('Provide at least one author.');
+        }
+
+        if ($twitterUsers === '') {
+            throw new InvalidArgumentException('Provide at least one author.');
+        }
+
+        $this->rule->group(function (RuleBuilder $rule) use ($twitterUsers) {
+            foreach (array_values((array) $twitterUsers) as $index => $user) {
+                $index === 0
+                    ? $rule->from($user)
+                    : $rule->orFrom($user);
+            }
+        });
+
+        $this->onTweet = Closure::fromCallable($whenTweets);
 
         return $this;
     }
 
     public function setLocale(string $lang): self
     {
-        $this->rule->locale($lang);
+        $this->rule->lang($lang);
 
         return $this;
     }
 
-    public function startListening(?Sets $sets = null): void
+    public function startListening(?FilteredStream $stream = null): void
     {
-        // Delete old rules
-        Rule::deleteBulk(...Rule::all());
-        $this->rule->save();
-
-        foreach ($this->stream->filteredTweets($sets) as $tweet) {
-            if (is_null($tweet)) {
-                continue;
-            }
-
-            call_user_func($this->onTweet, $tweet);
+        if ($this->onTweet === null) {
+            throw new LogicException('Configure a filter and callback before listening.');
         }
+
+        $rules = new RuleManager($this->connection);
+        $rule = (new RuleBuilder(operators: clone $this->rule->operators))->build();
+
+        $rules->delete($rules->all());
+        $rules->save($rule);
+
+        ($stream ?? new FilteredStream())->listen($this->connection, $this->onTweet);
     }
 }
